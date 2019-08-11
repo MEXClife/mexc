@@ -1,0 +1,28 @@
+{
+  "name": "mexc",
+  "version": "1.0.0",
+  "description": "MEXC Token Contract",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MEXClife/mexc.git"
+  },
+  "keywords": [
+    "MEXC",
+    "ERC20",
+    "'Smart",
+    "Contract'"
+  ],
+  "author": "Hisham Ismail <mhishami@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MEXClife/mexc/issues"
+  },
+  "homepage": "https://github.com/MEXClife/mexc#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "^2.3.0"
+  }
+}

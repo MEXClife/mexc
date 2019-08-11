@@ -1,0 +1,3 @@
+
+# MEXC Token Contract
+
