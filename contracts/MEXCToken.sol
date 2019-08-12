@@ -560,9 +560,9 @@ contract ERC20Burnable is ERC20 {
     /**
      * @dev See `ERC20._burnFrom`.
      */
-    function burnFrom(address account, uint256 amount) public {
-        _burnFrom(account, amount);
-    }
+    // function burnFrom(address account, uint256 amount) public {
+    //     _burnFrom(account, amount);
+    // }
 }
 
 /**
