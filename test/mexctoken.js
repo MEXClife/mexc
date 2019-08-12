@@ -136,12 +136,51 @@ contract("MEXCToken", accounts => {
   it("Mint and lock acc4, and acc4 should not be able to transfer", async () => {
     // mint to acc4
     await mexc.mintThenLock(acc4, toWei("2000", "ether"));
+    // await mexc.lockAddress(acc4);
+
     assert.equal(
       2900 * 10 ** 18,
       await mexc.totalSupply(),
-      "total supply should be 900"
+      "total supply should be 2900"
     );
-    var balance = await mexc.balanceOf(acc4);
-    assert.equal(2000 * 10 ** 18, balance, "Should be 2000 for now");
+
+    assert.equal(
+      2000 * 10 ** 18,
+      await mexc.balanceOf(acc4),
+      "Should be 2000 for now"
+    );
+
+    // try to send out
+    try {
+      assert.equal(
+        100 * 10 ** 18,
+        await mexc.balanceOf(acc2),
+        "Should be 200 again"
+      );
+
+      await mexc.transfer(acc2, toWei("100", "ether"), { from: acc4 });
+    } catch (e) {
+      assert.equal(
+        2000 * 10 ** 18,
+        await mexc.balanceOf(acc4),
+        "Should still be 2000 for now"
+      );
+
+      // ok, now unlock
+      await mexc.unlockAddress(acc4);
+      await mexc.transfer(acc2, toWei("100", "ether"), { from: acc4 });
+
+      assert.equal(
+        200 * 10 ** 18,
+        await mexc.balanceOf(acc2),
+        "acc2 should be 300 by now"
+      );
+
+      assert.equal(
+        1900 * 10 ** 18,
+        await mexc.balanceOf(acc4),
+        "Should be 1900 for now"
+      );
+    }
   });
 });

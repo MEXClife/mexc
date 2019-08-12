@@ -777,6 +777,10 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
             _;
         }
     }
+    
+    event burnTokenEvent(address account, uint256 value);
+    event lockAddressEvent(address account);
+    event unlockAddressEvent(address account);
 
     constructor() public {
     }
@@ -800,17 +804,17 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * lock the address from any transfer
      */
-    function lockAddress(address _addr) onlyOwner public returns (bool) {
+    function lockAddress(address _addr) onlyOwner public {
         locked[_addr] = true;
-        return true;
+        emit lockAddressEvent(_addr);
     }
 
     /**
      * lock the address from any transfer
      */
-    function unlockAddress(address _addr) onlyOwner public returns (bool) {
+    function unlockAddress(address _addr) onlyOwner public {
         locked[_addr] = false;
-        return true;
+        emit unlockAddressEvent(_addr);
     }
 
     /**
@@ -850,6 +854,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function burn(address account, uint256 value) public onlyOwner nonReentrant {
         super.burn(account, value);
+        emit burnTokenEvent(account, value);
     }
 
     /**
