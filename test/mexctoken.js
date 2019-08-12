@@ -14,6 +14,14 @@ contract("MEXCToken", accounts => {
     mexc = await MEXCToken.deployed();
   });
 
+  it("should enable transfer", async () => {
+    assert.equal(
+      true,
+      await mexc.isTransferAllowed(),
+      "Transfer should be allowed"
+    );
+  });
+
   it("should have the right token name and symbol", async () => {
     let name = await mexc.name();
     let symbol = await mexc.symbol();
@@ -47,6 +55,23 @@ contract("MEXCToken", accounts => {
       "Max supply should be 1714285714"
     );
     assert.equal(0 * 10 ** 18, ts, "Max supply should be 0");
+  });
+
+  it("should increase the supply for another 2b", async () => {
+    assert.equal(
+      1714285714 * 10 ** 18,
+      await mexc.maxSupply(),
+      "Max supply should be 1714285714"
+    );
+
+    // increase another 1b
+    await mexc.increaseSupply(toWei("1000000000", "ether"));
+
+    assert.equal(
+      2714285714 * 10 ** 18,
+      await mexc.maxSupply(),
+      "Max supply should be 1714285714"
+    );
   });
 
   it("should mint 1000 MEXC to acc1", async () => {

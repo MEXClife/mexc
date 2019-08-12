@@ -764,7 +764,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     uint8  public decimals = 18;
 
     uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
-    bool    public transferDisabled = true;         // disable transfer init.
+    bool    public transferDisabled = false;         // disable transfer init.
 
     mapping(address => bool) locked;                // locked addresses
 
@@ -799,7 +799,15 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     function disallowTransfers() onlyOwner public returns (bool) {
         transferDisabled = true;
         return true;
-    }  
+    } 
+
+    /**
+     * Check if the address is locked, or not
+     */
+    function isTransferAllowed() public view returns (bool) {
+        return transferDisabled == false;
+    }
+
 
     /**
      * lock the address from any transfer
@@ -833,6 +841,14 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     }
 
     /**
+     * Increase the max supply
+     */
+    function increaseSupply(uint256 supply) onlyOwner public returns (bool) {
+        maxSupply = maxSupply.add(supply);
+        return true;
+    }
+
+    /**
      * Mint the token to new owner
      */
     function mint(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
@@ -844,6 +860,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * Mint the token to new owner
      */
     function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner returns (bool) {
+        require((totalSupply + amount) <= maxSupply);
+        
         mint(account, amount);
         lockAddress(account);
         return true;
