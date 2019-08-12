@@ -31,26 +31,27 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
- contract MEXCToken is ERC20Mintable, ReentrancyGuard, Ownable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+contract MEXCToken is ERC20Mintable, ReentrancyGuard, Ownable {
+  using SafeMath for uint256;
+  using SafeERC20 for IERC20;
 
-    string public name     = "MEXC Token";
-    string public symbol   = "MEXC";
-    uint8  public decimals = 18;
+  string public name     = "MEXC Token";
+  string public symbol   = "MEXC";
+  uint8  public decimals = 18;
 
-    uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
-    bool    public transferDisabled = true;         // disable transfer init.
+  uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
+  bool    public transferDisabled = true;         // disable transfer init.
 
-    constructor() public {
-    }
 
-    /**
-     * Rename the token to new name, and symbol
-     */
-    function renameToken(string memory _symbol, string memory _name) onlyOwner public {
-      symbol = _symbol;
-      name = _name;
-    }
+  constructor() public {
+  }
 
- }
+  /**
+  * Rename the token to new name, and symbol
+  */
+  function renameToken(string memory _symbol, string memory _name) onlyOwner public {
+  symbol = _symbol;
+  name = _name;
+  }
+
+}

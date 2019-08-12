@@ -21,4 +21,11 @@ contract("MEXCToken", accounts => {
     assert.equal("FOO Token", name, "Symbol should be FOO Token");
     assert.equal("FOO", symbol, "Symbol should be FOO");
   });
+
+  it("should have a max supply of 1714285714", async () => {
+    let mexc = await MEXCToken.deployed();
+    let ts = await mexc.maxSupply();
+
+    assert.equal(1714285714, ts.toNumber(), "Max supply should be 1714285714");
+  });
 });
