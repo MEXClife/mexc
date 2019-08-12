@@ -57,7 +57,7 @@ contract("MEXCToken", accounts => {
     assert.equal(0 * 10 ** 18, ts, "Max supply should be 0");
   });
 
-  it("should increase the supply for another 2b", async () => {
+  it("should increase the supply for another 1b", async () => {
     assert.equal(
       1714285714 * 10 ** 18,
       await mexc.maxSupply(),
@@ -72,6 +72,25 @@ contract("MEXCToken", accounts => {
       await mexc.maxSupply(),
       "Max supply should be 1714285714"
     );
+  });
+
+  it("mint beyond 2b limit", async () => {
+    assert.equal(
+      2714285714 * 10 ** 18,
+      await mexc.maxSupply(),
+      "Max supply should be 1714285714"
+    );
+
+    // mint 3b MEXC
+    try {
+      await mexc.mint(acc1, toWei("3714285714", "ether"));
+    } catch (e) {
+      assert.equal(
+        2714285714 * 10 ** 18,
+        await mexc.maxSupply(),
+        "Max supply should be 1714285714"
+      );
+    }
   });
 
   it("should mint 1000 MEXC to acc1", async () => {
