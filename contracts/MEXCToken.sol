@@ -851,7 +851,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * Mint the token to new owner
      */
-    function mint(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+    function mint(address account, uint256 amount) 
+            onlyMinter onlyOwner nonReentrant public returns (bool) {
         require(totalSupply().add(amount) <= maxSupply);
         super.mint(account, amount);
         return true;
@@ -860,7 +861,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * Mint the token to new owner
      */
-    function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner returns (bool) {
+    function mintThenLock(address account, uint256 amount) 
+            onlyMinter onlyOwner public returns (bool) {
         require(totalSupply().add(amount) <= maxSupply);
         mint(account, amount);
         lockAddress(account);
@@ -870,7 +872,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * Burn the amount in the address
      */
-    function burn(address account, uint256 value) public onlyOwner nonReentrant {
+    function burn(address account, uint256 value) 
+            onlyOwner nonReentrant public {
         super.burn(account, value);
         emit burnTokenEvent(account, value);
     }
@@ -883,7 +886,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * - `recipient` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address recipient, uint256 amount) public canTransfer nonReentrant returns (bool) {
+    function transfer(address recipient, uint256 amount) 
+            canTransfer nonReentrant public returns (bool) {
         super.transfer(recipient, amount);
         return true;
     }
@@ -891,7 +895,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 value) public canTransfer nonReentrant returns (bool) {
+    function approve(address spender, uint256 value) 
+            canTransfer nonReentrant public returns (bool) {
         super.approve(spender, value);
         return true;
     }
@@ -902,7 +907,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * - the caller must have allowance for `sender`'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public canTransfer nonReentrant returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) 
+            canTransfer nonReentrant public returns (bool) {
         super.transferFrom(sender, recipient, amount);
         return true;
     }
@@ -915,7 +921,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(address spender, uint256 addedValue) public canTransfer nonReentrant returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) 
+            canTransfer nonReentrant public returns (bool) {
         super.increaseAllowance(spender, addedValue);
         return true;
     }
@@ -930,7 +937,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public canTransfer nonReentrant returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) 
+            canTransfer nonReentrant public returns (bool) {
         super.decreaseAllowance(spender, subtractedValue);
         return true;
     }  
