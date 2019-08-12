@@ -543,6 +543,29 @@ contract MinterRole {
 }
 
 /**
+ * @dev Extension of `ERC20` that allows token holders to destroy both their own
+ * tokens and those that they have an allowance for, in a way that can be
+ * recognized off-chain (via event analysis).
+ */
+contract ERC20Burnable is ERC20 {
+    /**
+     * @dev Destoys `amount` tokens from the caller.
+     *
+     * See `ERC20._burn`.
+     */
+    function burn(address account, uint256 amount) public {
+        _burn(account, amount);
+    }
+
+    /**
+     * @dev See `ERC20._burnFrom`.
+     */
+    function burnFrom(address account, uint256 amount) public {
+        _burnFrom(account, amount);
+    }
+}
+
+/**
  * @dev Extension of `ERC20` that adds a set of accounts with the `MinterRole`,
  * which have permission to mint (create) new tokens as they see fit.
  *
@@ -732,94 +755,161 @@ library SafeERC20 {
     }
 }
 
-contract MEXCToken is ERC20Mintable, ReentrancyGuard, Ownable {
-  using SafeMath for uint256;
-  using SafeERC20 for IERC20;
+contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-  string public name     = "MEXC Token";
-  string public symbol   = "MEXC";
-  uint8  public decimals = 18;
+    string public name     = "MEXC Token";
+    string public symbol   = "MEXC";
+    uint8  public decimals = 18;
 
-  uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
-  bool    public transferDisabled = true;         // disable transfer init.
+    uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
+    bool    public transferDisabled = true;         // disable transfer init.
 
-  mapping(address => bool) locked;                // locked addresses
+    mapping(address => bool) locked;                // locked addresses
 
-  modifier canTransfer() {
-    if (msg.sender == owner()) {
-      _;
-    } else {
-      require(!transferDisabled);
-      require(locked[msg.sender] == false);
-      _;
+    modifier canTransfer() {
+        if (msg.sender == owner()) {
+            _;
+        } else {
+            require(!transferDisabled);
+            require(locked[msg.sender] == false);
+            _;
+        }
     }
-  }
 
-  constructor() public {
-  }
+    constructor() public {
+    }
 
-  /**
-   * Allow the transfer of token to happen once listed on exchangers
-   */
-  function allowTransfers() onlyOwner public returns (bool) {
-    transferDisabled = false;
-    return true;
-  }
+    /**
+     * Allow the transfer of token to happen once listed on exchangers
+     */
+    function allowTransfers() onlyOwner public returns (bool) {
+        transferDisabled = false;
+        return true;
+    }
 
-  /**
-   * disallow the transfer
-   */
-  function disallowTransfers() onlyOwner public returns (bool) {
-    transferDisabled = true;
-    return true;
-  }  
+    /**
+     * disallow the transfer
+     */
+    function disallowTransfers() onlyOwner public returns (bool) {
+        transferDisabled = true;
+        return true;
+    }  
 
-  /**
-   * lock the address from any transfer
-   */
-  function lockAddress(address _addr) onlyOwner public returns (bool) {
-    locked[_addr] = true;
-    return true;
-  }
+    /**
+     * lock the address from any transfer
+     */
+    function lockAddress(address _addr) onlyOwner public returns (bool) {
+        locked[_addr] = true;
+        return true;
+    }
 
-  /**
-   * lock the address from any transfer
-   */
-  function unlockAddress(address _addr) onlyOwner public returns (bool) {
-    locked[_addr] = false;
-    return true;
-  }
+    /**
+     * lock the address from any transfer
+     */
+    function unlockAddress(address _addr) onlyOwner public returns (bool) {
+        locked[_addr] = false;
+        return true;
+    }
 
-  /**
-   * Check if the address is locked, or not
-   */
-  function isLocked(address _addr) public view returns (bool) {
-    return locked[_addr];
-  }
+    /**
+     * Check if the address is locked, or not
+     */
+    function isLocked(address _addr) public view returns (bool) {
+        return locked[_addr];
+    }
 
-  /**
-   * Rename the token to new name, and symbol
-   */
-  function renameToken(string memory _symbol, string memory _name) onlyOwner public {
-    symbol = _symbol;
-    name = _name;
-  }
+    /**
+     * Rename the token to new name, and symbol
+     */
+    function renameToken(string memory _symbol, string memory _name) onlyOwner public {
+        symbol = _symbol;
+        name = _name;
+    }
 
-  /**
-   * Mint the token to new owner
-   */
-  function mint(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
-    _mint(account, amount);
-    return true;
-  }
+    /**
+     * Mint the token to new owner
+     */
+    function mint(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+        super.mint(account, amount);
+        return true;
+    }
 
-  /**
-   * Mint the token to new owner
-   */
-  function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
-    mint(account, amount);
-    lockAddress(account);
-    return true;
-  }
+    /**
+     * Mint the token to new owner
+     */
+    function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+        mint(account, amount);
+        lockAddress(account);
+        return true;
+    }
+
+    /**
+     * Burn the amount in the address
+     */
+    function burnFrom(address account, uint256 value) public onlyOwner nonReentrant {
+        super.burnFrom(account, value);
+    }
+
+    /**
+     * @dev See `IERC20.transfer`.
+     *
+     * Requirements:
+     *
+     * - `recipient` cannot be the zero address.
+     * - the caller must have a balance of at least `amount`.
+     */
+    function transfer(address recipient, uint256 amount) public canTransfer nonReentrant returns (bool) {
+        super.transfer(recipient, amount);
+        return true;
+    }
+
+    /**
+     * - `spender` cannot be the zero address.
+     */
+    function approve(address spender, uint256 value) public canTransfer nonReentrant returns (bool) {
+        super.approve(spender, value);
+        return true;
+    }
+
+    /**
+     * - `sender` and `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `value`.
+     * - the caller must have allowance for `sender`'s tokens of at least
+     * `amount`.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) public canTransfer nonReentrant returns (bool) {
+        super.transferFrom(sender, recipient, amount);
+        return true;
+    }
+
+    /**
+     *
+     * Emits an `Approval` event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function increaseAllowance(address spender, uint256 addedValue) public canTransfer nonReentrant returns (bool) {
+        super.increaseAllowance(spender, addedValue);
+        return true;
+    }
+
+    /**
+     *
+     * Emits an `Approval` event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
+    function decreaseAllowance(address spender, uint256 subtractedValue) public canTransfer nonReentrant returns (bool) {
+        super.decreaseAllowance(spender, subtractedValue);
+        return true;
+    }  
 
 }
