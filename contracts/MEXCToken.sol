@@ -50,8 +50,8 @@ contract MEXCToken is ERC20Mintable, ReentrancyGuard, Ownable {
   * Rename the token to new name, and symbol
   */
   function renameToken(string memory _symbol, string memory _name) onlyOwner public {
-  symbol = _symbol;
-  name = _name;
+    symbol = _symbol;
+    name = _name;
   }
 
 }
