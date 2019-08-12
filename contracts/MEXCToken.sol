@@ -743,16 +743,83 @@ contract MEXCToken is ERC20Mintable, ReentrancyGuard, Ownable {
   uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
   bool    public transferDisabled = true;         // disable transfer init.
 
+  mapping(address => bool) locked;                // locked addresses
+
+  modifier canTransfer() {
+    if (msg.sender == owner()) {
+      _;
+    } else {
+      require(!transferDisabled);
+      require(locked[msg.sender] == false);
+      _;
+    }
+  }
 
   constructor() public {
   }
 
   /**
-  * Rename the token to new name, and symbol
-  */
+   * Allow the transfer of token to happen once listed on exchangers
+   */
+  function allowTransfers() onlyOwner public returns (bool) {
+    transferDisabled = false;
+    return true;
+  }
+
+  /**
+   * disallow the transfer
+   */
+  function disallowTransfers() onlyOwner public returns (bool) {
+    transferDisabled = true;
+    return true;
+  }  
+
+  /**
+   * lock the address from any transfer
+   */
+  function lockAddress(address _addr) onlyOwner public returns (bool) {
+    locked[_addr] = true;
+    return true;
+  }
+
+  /**
+   * lock the address from any transfer
+   */
+  function unlockAddress(address _addr) onlyOwner public returns (bool) {
+    locked[_addr] = false;
+    return true;
+  }
+
+  /**
+   * Check if the address is locked, or not
+   */
+  function isLocked(address _addr) public view returns (bool) {
+    return locked[_addr];
+  }
+
+  /**
+   * Rename the token to new name, and symbol
+   */
   function renameToken(string memory _symbol, string memory _name) onlyOwner public {
     symbol = _symbol;
     name = _name;
+  }
+
+  /**
+   * Mint the token to new owner
+   */
+  function mint(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+    _mint(account, amount);
+    return true;
+  }
+
+  /**
+   * Mint the token to new owner
+   */
+  function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+    mint(account, amount);
+    lockAddress(account);
+    return true;
   }
 
 }
