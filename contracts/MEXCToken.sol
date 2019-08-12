@@ -853,7 +853,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function mint(address account, uint256 amount) 
             onlyMinter onlyOwner nonReentrant public returns (bool) {
-        require(totalSupply().add(amount) <= maxSupply, "MEXCToken: exceeding the maxSupply amount");
+        require(totalSupply().add(amount) <= maxSupply, "MEXC: exceeding the maxSupply amount");
         super.mint(account, amount);
         return true;
     }
@@ -863,7 +863,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function mintThenLock(address account, uint256 amount) 
             onlyMinter onlyOwner public returns (bool) {
-        require(totalSupply().add(amount) <= maxSupply, "MEXCToken: exceeding the maxSupply amount");
+        require(totalSupply().add(amount) <= maxSupply, "MEXC: exceeding the maxSupply amount");
         mint(account, amount);
         lockAddress(account);
         return true;
