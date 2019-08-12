@@ -523,13 +523,13 @@ contract MinterRole {
         return _minters.has(account);
     }
 
-    function addMinter(address account) public onlyMinter {
-        _addMinter(account);
-    }
+    // function addMinter(address account) public onlyMinter {
+    //     _addMinter(account);
+    // }
 
-    function renounceMinter() public {
-        _removeMinter(msg.sender);
-    }
+    // function renounceMinter() public {
+    //     _removeMinter(msg.sender);
+    // }
 
     function _addMinter(address account) internal {
         _minters.add(account);
@@ -759,21 +759,21 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    string public name     = "MEXC Token";
-    string public symbol   = "MEXC";
-    uint8  public decimals = 18;
-
+    string  public name      = "MEXC Token";
+    string  public symbol    = "MEXC";
+    uint8   public decimals  = 18;
     uint256 public maxSupply = 1714285714 ether;    // max allowable minting.
-    bool    public transferDisabled = false;        // disable transfer init.
 
-    mapping(address => bool) locked;                // locked addresses
+    bool    private _transferAllowed = true;        // allow/disallow transfer.
+
+    mapping(address => bool) locked;                // locked addresses.
 
     modifier canTransfer() {
         if (msg.sender == owner()) {
             _;
         } else {
-            require(!transferDisabled);
-            require(locked[msg.sender] == false);
+            require(_transferAllowed, "MEXC: transfer is not allowed");
+            require(locked[msg.sender] == false, "MEXC: account is locked");
             _;
         }
     }
@@ -781,6 +781,8 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     event burnTokenEvent(address account, uint256 value);
     event lockAddressEvent(address account);
     event unlockAddressEvent(address account);
+    event tokenIsRenamed(string symbol, string name);
+    event supplyHasIncreased(uint256 newSupply);
 
     constructor() public {
     }
@@ -789,7 +791,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * Allow the transfer of token to happen once listed on exchangers
      */
     function allowTransfers() onlyOwner public returns (bool) {
-        transferDisabled = false;
+        _transferAllowed = true;
         return true;
     }
 
@@ -797,17 +799,13 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * disallow the transfer
      */
     function disallowTransfers() onlyOwner public returns (bool) {
-        transferDisabled = true;
+        _transferAllowed = false;
         return true;
     } 
 
-    /**
-     * Check if the address is locked, or not
-     */
     function isTransferAllowed() public view returns (bool) {
-        return transferDisabled == false;
+        return _transferAllowed;
     }
-
 
     /**
      * lock the address from any transfer
@@ -838,6 +836,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     function renameToken(string memory _symbol, string memory _name) onlyOwner public {
         symbol = _symbol;
         name = _name;
+        emit tokenIsRenamed(_symbol, _name);
     }
 
     /**
@@ -845,6 +844,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function increaseSupply(uint256 supply) onlyOwner public returns (bool) {
         maxSupply = maxSupply.add(supply);
+        emit supplyHasIncreased(maxSupply);
         return true;
     }
 
@@ -853,7 +853,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function mint(address account, uint256 amount) 
             onlyMinter onlyOwner nonReentrant public returns (bool) {
-        require(totalSupply().add(amount) <= maxSupply);
+        require(totalSupply().add(amount) <= maxSupply, "MEXCToken: exceeding the maxSupply amount");
         super.mint(account, amount);
         return true;
     }
@@ -863,7 +863,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      */
     function mintThenLock(address account, uint256 amount) 
             onlyMinter onlyOwner public returns (bool) {
-        require(totalSupply().add(amount) <= maxSupply);
+        require(totalSupply().add(amount) <= maxSupply, "MEXCToken: exceeding the maxSupply amount");
         mint(account, amount);
         lockAddress(account);
         return true;
