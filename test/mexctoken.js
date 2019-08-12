@@ -5,6 +5,7 @@ contract("MEXCToken", accounts => {
   let acc1 = accounts[1];
   let acc2 = accounts[2];
   let acc3 = accounts[3];
+  let acc4 = accounts[4];
 
   const toWei = web3.utils.toWei;
   var mexc;
@@ -130,5 +131,17 @@ contract("MEXCToken", accounts => {
     // total supply should reduce
     var ts1 = await mexc.totalSupply();
     assert.equal(900 * 10 ** 18, ts1, "total supply should be 900");
+  });
+
+  it("Mint and lock acc4, and acc4 should not be able to transfer", async () => {
+    // mint to acc4
+    await mexc.mintThenLock(acc4, toWei("2000", "ether"));
+    assert.equal(
+      2900 * 10 ** 18,
+      await mexc.totalSupply(),
+      "total supply should be 900"
+    );
+    var balance = await mexc.balanceOf(acc4);
+    assert.equal(2000 * 10 ** 18, balance, "Should be 2000 for now");
   });
 });

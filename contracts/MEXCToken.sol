@@ -839,7 +839,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
     /**
      * Mint the token to new owner
      */
-    function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner nonReentrant returns (bool) {
+    function mintThenLock(address account, uint256 amount) public onlyMinter onlyOwner returns (bool) {
         mint(account, amount);
         lockAddress(account);
         return true;
