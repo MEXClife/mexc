@@ -523,13 +523,17 @@ contract MinterRole {
         return _minters.has(account);
     }
 
-    // function addMinter(address account) public onlyMinter {
-    //     _addMinter(account);
-    // }
+    function addMinter(address account) public onlyMinter {
+        _addMinter(account);
+    }
 
-    // function renounceMinter() public {
-    //     _removeMinter(msg.sender);
-    // }
+    function renounceMinter() public {
+        _removeMinter(msg.sender);
+    }
+
+    function removeMinter(address account) public onlyMinter {
+        _removeMinter(account);
+    }
 
     function _addMinter(address account) internal {
         _minters.add(account);
@@ -942,5 +946,14 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
         super.decreaseAllowance(spender, subtractedValue);
         return true;
     }  
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public onlyOwner {
+        super.transferOwnership(newOwner);
+        super.addMinter(newOwner);
+    }
 
 }

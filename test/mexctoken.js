@@ -227,4 +227,25 @@ contract("MEXCToken", accounts => {
       );
     }
   });
+
+  // transfer ownership to acc1, and mint to acc2 for 300
+  it("should transfer ownership to acc1, and mint acc2 for 300", async () => {
+    await mexc.transferOwnership(acc1, { from: owner });
+
+    // acc1 mint acc2 for 300;
+    assert.equal(
+      200 * 10 ** 18,
+      await mexc.balanceOf(acc2),
+      "acc2 should be 200"
+    );
+
+    // mint 200 for acc2
+    await mexc.mint(acc2, toWei("200", "ether"), { from: acc1 });
+
+    assert.equal(
+      400 * 10 ** 18,
+      await mexc.balanceOf(acc2),
+      "acc2 should be 400 by now"
+    );
+  });
 });
