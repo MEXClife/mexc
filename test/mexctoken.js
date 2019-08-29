@@ -70,7 +70,7 @@ contract("MEXCToken", accounts => {
     assert.equal(
       2714285714 * 10 ** 18,
       await mexc.maxSupply(),
-      "Max supply should be 1714285714"
+      "Max supply should be 2714285714"
     );
   });
 
@@ -78,7 +78,7 @@ contract("MEXCToken", accounts => {
     assert.equal(
       2714285714 * 10 ** 18,
       await mexc.maxSupply(),
-      "Max supply should be 1714285714"
+      "Max supply should be 2714285714"
     );
 
     // mint 3b MEXC
@@ -88,7 +88,7 @@ contract("MEXCToken", accounts => {
       assert.equal(
         2714285714 * 10 ** 18,
         await mexc.maxSupply(),
-        "Max supply should be 1714285714"
+        "Max supply should be 2714285714"
       );
     }
   });
@@ -126,7 +126,7 @@ contract("MEXCToken", accounts => {
     var acc2Balance = await mexc.balanceOf(acc2);
     assert.equal(200 * 10 ** 18, acc2Balance, "Should be 200 by now");
 
-    // lock acc2
+    // lock acc2 from transfer
     await mexc.lockAddress(acc2);
 
     // try to transfer to acc3
@@ -137,12 +137,12 @@ contract("MEXCToken", accounts => {
       assert.equal(
         200 * 10 ** 18,
         await mexc.balanceOf(acc2),
-        "Should be 200 again"
+        "Should still be 200 as transfer is locked"
       );
       assert.equal(
         0 * 10 ** 18,
         await mexc.balanceOf(acc3),
-        "Should be 0 again"
+        "Should be 0 as no transfer happened"
       );
     }
   });
@@ -153,12 +153,12 @@ contract("MEXCToken", accounts => {
     assert.equal(
       100 * 10 ** 18,
       await mexc.balanceOf(acc2),
-      "Should be 200 again"
+      "Should be 100, after transfer of 100 to acc3"
     );
     assert.equal(
       100 * 10 ** 18,
       await mexc.balanceOf(acc3),
-      "Should be 0 again"
+      "acc3 balance should be 100 after received from acc2"
     );
   });
 
@@ -166,9 +166,20 @@ contract("MEXCToken", accounts => {
     var ts = await mexc.totalSupply();
     assert.equal(1000 * 10 ** 18, ts, "Should be 1,000");
 
+    // get balance of acc3
+    assert.equal(
+      100 * 10 ** 18,
+      await mexc.balanceOf(acc3),
+      "acc3 balance should be 100 after received from acc2"
+    );
+
     // burn acc3
     await mexc.burn(acc3, toWei("100", "ether"), { from: owner });
-    assert.equal(0 * 10 ** 18, await mexc.balanceOf(acc3), "Should be 0 again");
+    assert.equal(
+      0 * 10 ** 18,
+      await mexc.balanceOf(acc3),
+      "Balance of acc3 should be 0 again"
+    );
   });
 
   it("total supply should be 900", async () => {
@@ -185,13 +196,13 @@ contract("MEXCToken", accounts => {
     assert.equal(
       2900 * 10 ** 18,
       await mexc.totalSupply(),
-      "total supply should be 2900"
+      "total supply should be 2900, after minting new 2,000 MEXC"
     );
 
     assert.equal(
       2000 * 10 ** 18,
       await mexc.balanceOf(acc4),
-      "Should be 2000 for now"
+      "acc4 balances should be 2000 by now"
     );
 
     // try to send out
@@ -199,15 +210,16 @@ contract("MEXCToken", accounts => {
       assert.equal(
         100 * 10 ** 18,
         await mexc.balanceOf(acc2),
-        "Should be 200 again"
+        "acc2 balance should be 100"
       );
 
+      // this would fail
       await mexc.transfer(acc2, toWei("100", "ether"), { from: acc4 });
     } catch (e) {
       assert.equal(
         2000 * 10 ** 18,
         await mexc.balanceOf(acc4),
-        "Should still be 2000 for now"
+        "acc4 balance should still be 2000 for now"
       );
 
       // ok, now unlock
@@ -217,13 +229,13 @@ contract("MEXCToken", accounts => {
       assert.equal(
         200 * 10 ** 18,
         await mexc.balanceOf(acc2),
-        "acc2 should be 300 by now"
+        "acc2 should be 200 by now, after 100 MEXC transfer from acc4"
       );
 
       assert.equal(
         1900 * 10 ** 18,
         await mexc.balanceOf(acc4),
-        "Should be 1900 for now"
+        "acc4 balance should be 1900 MEXC, after transferring 100 to acc2"
       );
     }
   });
@@ -245,7 +257,31 @@ contract("MEXCToken", accounts => {
     assert.equal(
       400 * 10 ** 18,
       await mexc.balanceOf(acc2),
-      "acc2 should be 400 by now"
+      "acc2 should be 400 by now, after minted 200 from acc1"
     );
+  });
+
+  it("previous owner cannot burn, mint and do all with super privileges", async () => {
+    try {
+      // owner cannot mint, and this would fail
+      await mexc.mint(acc2, toWei("200", "ether"), { from: owner });
+    } catch (e) {
+      assert.equal(
+        400 * 10 ** 18,
+        await mexc.balanceOf(acc2),
+        "acc2 should still be 400 MEXC"
+      );
+    }
+
+    // try to burn amount
+    try {
+      await mexc.burn(acc2, toWei("400", "ether"), { from: owner });
+    } catch (e) {
+      assert.equal(
+        400 * 10 ** 18,
+        await mexc.balanceOf(acc2),
+        "acc2 should still be 400 MEXC"
+      );
+    }
   });
 });
