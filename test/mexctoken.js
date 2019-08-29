@@ -284,4 +284,9 @@ contract("MEXCToken", accounts => {
       );
     }
   });
+
+  // it("should destroy the contract, and should not be a contract address anymore", async () => {
+  //   // destroy the contract
+  //   await mexc.destroy({ from: acc1 });
+  // });
 });
