@@ -877,7 +877,7 @@ contract MEXCToken is ERC20Mintable, ERC20Burnable, ReentrancyGuard, Ownable {
      * Burn the amount in the address
      */
     function burn(address account, uint256 value) 
-            onlyOwner nonReentrant public {
+            onlyMinter onlyOwner nonReentrant public {
         super.burn(account, value);
         emit burnTokenEvent(account, value);
     }
